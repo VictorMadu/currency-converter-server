@@ -1,0 +1,7 @@
+{
+  "restartable": "rs",
+  "ignore": [".git", "node_modules/", "build/", "coverage/"],
+  "watch": ["src/"],
+  "exec": "yarn build && yarn start",
+  "ext": "js,json,ts"
+}
