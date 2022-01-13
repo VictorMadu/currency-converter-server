@@ -1,6 +1,5 @@
 import { IMongo } from "../../../../db/mongo/_dtypes";
 import MongoService from "./mongo";
-import { IGetPrices } from "./_dtypes";
 
 class DbService {
   private mongoService: MongoService;
@@ -8,12 +7,8 @@ class DbService {
     this.mongoService = new MongoService(mongo);
   }
 
-  async getPrices(payload: IGetPrices) {
-    return await this.mongoService.getPrices(payload);
-  }
-
-  async getBaseId() {
-    return await this.mongoService.getBaseId();
+  async listAllCurrencies() {
+    return await this.mongoService.listAllCurrencies();
   }
 }
 
