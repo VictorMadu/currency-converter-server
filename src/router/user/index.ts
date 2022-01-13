@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import mongoPlugin from "../../db/mongo";
-import { MONGO_KEY } from "./constant";
+import { MONGO_KEY } from "../_constants";
 import loginInPlugin from "./log-in";
 import signUpPlugin from "./sign-up";
 import updateNotifyPlugin from "./update-notify";

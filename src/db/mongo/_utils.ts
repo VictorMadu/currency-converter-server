@@ -3,14 +3,7 @@ import { IMongoConfig } from "./_dtypes";
 
 export class MongoService {
   private mongoClient!: MongoClient;
-  constructor(private mongoConfig: IMongoConfig) {
-    // this.db = this.db.bind(this);
-    // this.col = this.col.bind(this);
-    // this.connect = this.connect.bind(this);
-    // this.db = this.db.bind(this);
-    // this.db = this.db.bind(this);
-    // this.db = this.db.bind(this);
-  }
+  constructor(private mongoConfig: IMongoConfig) {}
 
   db = () => {
     const dbName: string = this.mongoConfig.name;

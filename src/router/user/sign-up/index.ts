@@ -8,6 +8,7 @@ import { Route } from "./_dtypes";
 
 const signUpPlugin: FastifyPluginAsync = async (fastify, opts) => {
   fastify.register(dbServicePlugin);
+  // fastify.register()
 
   fastify.post<Route>(
     "",
@@ -19,6 +20,7 @@ const signUpPlugin: FastifyPluginAsync = async (fastify, opts) => {
         body: bodySchema,
       },
     },
+    // TODO: Make all handlers and preHandlers plugins and inject dependencies in all of them. Do this for everything, inject them dependencies. Compare the difference in performance
     _.partial(handler, fastify)
   );
   fastify.addHook("preHandler", _.partial(preHandler, fastify));
