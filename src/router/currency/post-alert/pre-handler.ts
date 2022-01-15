@@ -1,15 +1,16 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance } from "fastify";
 import { getConfig } from "../../../config";
 import { Pipe } from "../../../lib";
+import { getDbService } from "./db-service";
 import * as _ from "lodash";
-import { IReqBody, IReqData, IRoute } from "./_dtypes";
-import { headerAuthTransformer } from "./transformers";
+import { IReq, IRep, IReqBody, IReqData } from "./_dtypes";
 import { getReqPayloadTransformed } from "../../../router/req-payload-transformed";
+import { headerAuthTransformer } from "../../../router/user/update-notify/transformers";
 
 const preHandler = async (
   fastify: FastifyInstance,
-  request: FastifyRequest<IRoute>,
-  reply: FastifyReply
+  request: IReq,
+  reply: IRep
 ) => {
   const onForbiddenError = (errMsg?: string) => {
     reply.code(403).send(errMsg ?? "Not authorized");

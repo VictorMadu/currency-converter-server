@@ -1,12 +1,3 @@
-export const paramsSchema = {
-  type: "object",
-  properties: {
-    userId: { type: "string" },
-  },
-  required: ["userId"],
-  additionalProperties: false,
-} as const;
-
 export const bodySchema = {
   type: "object",
   properties: {

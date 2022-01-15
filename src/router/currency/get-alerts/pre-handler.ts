@@ -1,15 +1,16 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance } from "fastify";
 import { getConfig } from "../../../config";
 import { Pipe } from "../../../lib";
+import { getDbService } from "./db-service";
 import * as _ from "lodash";
-import { IReqBody, IReqData, IRoute } from "./_dtypes";
-import { headerAuthTransformer } from "./transformers";
+import { IReq, IRep, IReqQuery, IReqData } from "./_dtypes";
 import { getReqPayloadTransformed } from "../../../router/req-payload-transformed";
+import { headerAuthTransformer } from "../../../router/user/update-notify/transformers";
 
 const preHandler = async (
   fastify: FastifyInstance,
-  request: FastifyRequest<IRoute>,
-  reply: FastifyReply
+  request: IReq,
+  reply: IRep
 ) => {
   const onForbiddenError = (errMsg?: string) => {
     reply.code(403).send(errMsg ?? "Not authorized");
@@ -21,7 +22,7 @@ const preHandler = async (
     .setContext([jwtSecretKey, onForbiddenError])
     .run(request.headers.authorization);
 
-  _.set(getReqPayloadTransformed(request), "body", request.body) as IReqBody;
+  _.set(getReqPayloadTransformed(request), "query", request.query) as IReqQuery;
   _.set(getReqPayloadTransformed(request), "data", { userId }) as IReqData;
 };
 

@@ -8,3 +8,7 @@ export type PromiseReturnType<T> = T extends Func<any[], Promise<infer O>>
 
 // stackoverflow.com/questions/56006111/is-it-possible-to-defined-a-non-empty-array-type-in-typescript
 export type NonEmptyArray<T> = [T, ...T[]];
+
+export type BooleanFilter<T extends any, B extends boolean> = B extends true
+  ? T
+  : never;

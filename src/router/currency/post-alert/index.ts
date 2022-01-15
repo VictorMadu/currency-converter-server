@@ -1,28 +1,28 @@
 import { FastifyPluginAsync } from "fastify";
-import * as _ from "lodash";
 import dbServicePlugin from "./db-service";
+import * as _ from "lodash";
 import handler from "./handler";
+import { bodySchema, res200Schema, reqHeaderSchema } from "./schemas";
 import preHandler from "./pre-handler";
-import { res201Schema, bodySchema, reqHeaderSchema } from "./schemas";
+import { IRoute } from "./_dtypes";
 
-const updateNotifyPlugin: FastifyPluginAsync = async (fastify, opts) => {
+const postAlertPlugin: FastifyPluginAsync = async (fastify, opts) => {
   fastify.register(dbServicePlugin);
 
-  fastify.put(
+  fastify.post<IRoute>(
     "",
     {
       schema: {
         response: {
-          "201": res201Schema,
+          "200": res200Schema,
         },
-        body: bodySchema,
         headers: reqHeaderSchema,
+        body: bodySchema,
       },
     },
     _.partial(handler, fastify)
   );
-
   fastify.addHook("preHandler", _.partial(preHandler, fastify));
 };
 
-export default updateNotifyPlugin;
+export default postAlertPlugin;
