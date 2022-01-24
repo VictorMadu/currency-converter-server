@@ -9,9 +9,12 @@
     "dev": "nodemon --config nodemon.json"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/cron": "^1.7.3",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^17.0.7",
     "@types/validator": "^13.7.1",
+    "@types/ws": "^8.2.2",
     "nodemon": "^2.0.15",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
@@ -24,8 +27,12 @@
     "@types/lodash": "^4.14.178",
     "@types/mongodb": "^4.0.7",
     "ajv": "^8.8.2",
+    "axios": "^0.25.0",
     "bcrypt": "^5.0.1",
+    "bufferutil": "^4.0.6",
+    "cron": "^1.8.2",
     "fastify": "^3.25.3",
+    "fastify-cors": "^6.0.2",
     "fastify-plugin": "^3.0.0",
     "js-yaml": "^4.1.0",
     "json-schema-to-ts": "^1.6.5",
@@ -33,6 +40,8 @@
     "lodash": "^4.17.21",
     "mongodb": "^4.3.0",
     "pino": "^7.6.3",
-    "validator": "^13.7.0"
+    "utf-8-validate": "^5.0.8",
+    "validator": "^13.7.0",
+    "ws": "^8.4.2"
   }
 }

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { getConfig } from "../../../config";
-import { Pipe } from "../../../lib";
+import { Pipe } from "../../../_utils";
 import { getDbService } from "./db-service";
 import * as _ from "lodash";
 import { IReq, IRep, IReqQuery, IReqData } from "./_dtypes";

@@ -4,7 +4,7 @@ import { getDbService } from "./db-service";
 import { Rep, Req } from "./_dtypes";
 import * as _ from "lodash";
 import { getConfig } from "../../../config";
-const jwt = require("jsonwebtoken");
+import * as jwt from "../../../_utils/jwt";
 
 const handler = async (fastify: FastifyInstance, request: Req, reply: Rep) => {
   const dbService = getDbService(fastify);
@@ -15,15 +15,11 @@ const handler = async (fastify: FastifyInstance, request: Req, reply: Rep) => {
 
   const secretKey = _.get(getConfig(fastify), "jwt.cat1.secret_key") as string;
   const expires = _.get(getConfig(fastify), "jwt.cat1.expires") as string;
-  const token = signJWT(secretKey, expires, { id: result.id });
+  const token = jwt.signUser(secretKey, expires, { id: result.id });
   return reply.code(200).send({
     success: true,
     data: _.set(result, "token", token),
   });
-};
-
-const signJWT = (secretKey: string, expires: string, payload: object) => {
-  return jwt.sign(payload, secretKey, { expiresIn: expires });
 };
 
 export default handler;

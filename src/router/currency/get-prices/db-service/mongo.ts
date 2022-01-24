@@ -2,7 +2,7 @@ import { IMongo } from "../../../../db/mongo/_dtypes";
 import { IGetPrices } from "./_dtypes";
 import { Document } from "mongodb";
 import * as _ from "lodash";
-import { throwError } from "../../../../lib";
+import { throwError } from "../../../../_utils";
 
 class MongoService {
   constructor(private mongo: IMongo) {}
@@ -17,6 +17,7 @@ class MongoService {
       : {};
 
     const baseLastTwoRates = await this.getBaseLastTwoRates(payload.base);
+
     const cursor = await this.mongo
       .col("currencies")
       .aggregate(this.getPricePipeline(matchQuery, ...baseLastTwoRates));
@@ -31,13 +32,14 @@ class MongoService {
   }
 
   async getBaseId() {
+    // TODO: Accept an optional date in which we will aggreagte and obtain the base with the maximum date of all dates less or equla to the passed optional date else just return the maximum date of all dates
     const cursor = await this.mongo.col("__meta").find(
       { _id: "currencies" },
       {
         limit: 1,
         projection: {
           _id: 0,
-          base: { $last: "$bases.id" },
+          currBase: { $last: "$bases.id" },
         },
       }
     );
@@ -45,7 +47,7 @@ class MongoService {
     const result = await cursor.next();
     cursor.close();
 
-    return result?.base as string | undefined;
+    return result?.currBase as string | undefined;
   }
 
   private async getBaseLastTwoRates(
@@ -55,7 +57,7 @@ class MongoService {
       { _id: baseId },
       {
         limit: 1,
-        projection: { _id: 0, lastTwo: { $slice: ["$rates.rate", -2] } },
+        projection: { _id: 0, lastTwo: { $slice: ["$rates", -2] } },
       }
     );
 
@@ -70,6 +72,8 @@ class MongoService {
     return lastTwo.length === 1 ? [undefined, ...lastTwo] : lastTwo;
   }
 
+  // TODO: In pipeline, if there is only no prev_curr_rate, do not add prev_curr rate
+  // HINT: Remove the curr_rate and price_rate is it is null or undefiend
   private getPricePipeline(
     matchQuery: Document,
     basePrevPrice: number | undefined,
@@ -89,7 +93,7 @@ class MongoService {
               {
                 $divide: [
                   {
-                    $arrayElemAt: ["$rates.rate", -2],
+                    $arrayElemAt: ["$rates", -2],
                   },
                   basePrevPrice,
                 ],
@@ -102,7 +106,7 @@ class MongoService {
               {
                 $divide: [
                   {
-                    $arrayElemAt: ["$rates.rate", -1],
+                    $arrayElemAt: ["$rates", -1],
                   },
                   baseCurrPrice,
                 ],

@@ -20,6 +20,7 @@ export const res201Schema = {
         phone: { type: "string" },
         token: { type: "string" },
       },
+      required: ["id", "email", "phone", "token"],
       additionalProperties: false,
     },
   },

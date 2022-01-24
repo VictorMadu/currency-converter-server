@@ -3,11 +3,11 @@ import { getReqPayloadTransformed } from "../../../router/req-payload-transforme
 import { getDbService } from "./db-service";
 import { IReqQuery, IRes200, Rep, Req } from "./_dtypes";
 import * as _ from "lodash";
-import { throwError } from "../../../lib";
+import { throwError } from "../../../_utils";
 
 const handler = async (fastify: FastifyInstance, request: Req, reply: Rep) => {
   const dbService = getDbService(fastify);
-  const { base, currencies } = _.get(
+  const { base, quota } = _.get(
     getReqPayloadTransformed(request),
     "query"
   ) as IReqQuery;
@@ -17,12 +17,15 @@ const handler = async (fastify: FastifyInstance, request: Req, reply: Rep) => {
     return throwError("base currency in 'currencies' in '__meta' is not found");
   const result = await dbService.getPrices({
     base: baseId,
-    currencies,
+    currencies: quota,
   });
 
   const res: IRes200 = {
     success: true,
-    data: result,
+    data: {
+      base: baseId,
+      currencies: result,
+    },
   };
 
   return reply.code(200).send(res);

@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { getConfig } from "../../../config";
-import { Pipe } from "../../../lib";
+import { Pipe } from "../../../_utils";
 import * as _ from "lodash";
 import { IReqBody, IReqData, IRoute } from "./_dtypes";
 import { headerAuthTransformer } from "./transformers";
-import { getReqPayloadTransformed } from "../../../router/req-payload-transformed";
+import { getReqPayloadTransformed } from "../../req-payload-transformed";
 
 const preHandler = async (
   fastify: FastifyInstance,

@@ -1,4 +1,4 @@
-import { getMongoProjection, ItemsStack } from "../../../../lib";
+import { getMongoProjection, ItemsStack } from "../../../../_utils";
 import { IMongo } from "../../../../db/mongo/_dtypes";
 import { IGetUserConfig } from "./_dtype";
 

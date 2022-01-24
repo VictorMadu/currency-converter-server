@@ -1,5 +1,5 @@
 import v from "validator";
-import { Pipe, throwError } from "../../../lib";
+import { Pipe, throwError } from "../../../_utils";
 import DbService from "./db-service/_service";
 import * as _ from "lodash";
 import * as bcrypt from "bcrypt";

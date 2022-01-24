@@ -1,7 +1,7 @@
 import fastify, { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { getMongo } from "../../../../db/mongo";
-import { MONGO_KEY } from "../../../../router/_constants";
+import { MONGO_KEY } from "../../../_constants";
 
 import Service from "./_service";
 

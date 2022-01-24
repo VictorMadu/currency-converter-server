@@ -1,4 +1,4 @@
-import { Pipe } from "../../../lib";
+import { Pipe } from "../../../_utils";
 import v from "validator";
 import * as _ from "lodash";
 

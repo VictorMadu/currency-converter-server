@@ -28,5 +28,4 @@ const handler = async (
 
   return reply.code(200).send(res);
 };
-
 export default handler;

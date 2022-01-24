@@ -1,14 +1,25 @@
 import { IMongo } from "../../../../db/mongo/_dtypes";
-import { IGetPrices, IGetPricesOut } from "./_dtypes";
+import { IGetPriceOut, IGetPrices } from "./_dtypes";
 import { Document } from "mongodb";
 import * as _ from "lodash";
-import { throwError } from "../../../../lib";
+import { throwError } from "../../../../_utils";
 import { ObjectId } from "mongodb";
 
 class MongoService {
   constructor(private mongo: IMongo) {}
 
   async getAlerts(payload: IGetPrices) {
+    console.log(
+      "\n\n\n",
+      JSON.stringify(
+        this.getPipeline(
+          new ObjectId(payload.userId),
+          payload.bases,
+          payload.quotas,
+          payload.type
+        )
+      )
+    );
     const cursor = await this.mongo
       .col("currencies")
       .aggregate(
@@ -22,10 +33,7 @@ class MongoService {
     // TODO: Next use limit or stream
     const alert = await cursor.toArray();
 
-    return alert as
-      | IGetPricesOut<true, true>
-      | IGetPricesOut<true, false>
-      | IGetPricesOut<false, true>;
+    return alert as IGetPriceOut[];
   }
 
   private getMatchQuery(base?: string[]) {
@@ -81,7 +89,11 @@ class MongoService {
                           {
                             $eq: ["$$pending_alert.user_id", userId],
                           },
-                          this.aggIsIn("$$pending_alert.quota", quotas),
+                          quotas
+                            ? {
+                                $in: ["$$pending_alert.quota", quotas],
+                              }
+                            : true,
                         ],
                       },
                     },
@@ -106,7 +118,14 @@ class MongoService {
                           {
                             $eq: ["$$triggered_alert.user_id", userId],
                           },
-                          this.aggIsIn("$$triggered_alert.quota", quotas),
+                          quotas
+                            ? {
+                                $in: [
+                                  "$$triggered_alert.quota",
+                                  ["NGN", "AFN"],
+                                ],
+                              }
+                            : true,
                         ],
                       },
                     },
@@ -213,18 +232,20 @@ class MongoService {
       {
         $project: {
           short: 1,
-          name: 1,
+          // name: 1,
+          // prev_rate: { $arrayElemAt: ["$rates", -2] },
+          // curr_rate: { $arrayElemAt: ["$rates", -1] },
           ...this.getAggregateForType(
             {
               pending_alerts: {
                 $map: {
                   input: "$pending_alerts",
                   in: {
+                    id: "$$this._id",
                     set_time: "$$this.set_time",
                     target_rate: "$$this.target_ratio",
                     set_rate: "$$this.set_ratio",
-                    quota_short: "$$this.quota._id",
-                    quota_name: "$$this.quota.name",
+                    quota: "$$this.quota._id",
                     prev_rate: {
                       $round: [
                         {
@@ -268,13 +289,13 @@ class MongoService {
                 $map: {
                   input: "$triggered_alerts",
                   in: {
+                    id: "$$this._id",
                     set_time: "$$this.set_time",
                     target_rate: "$$this.target_ratio",
                     set_rate: "$$this.set_ratio",
-                    triggered_rate: "$$this.triggered_ratio",
+                    quota: "$$this.quota._id",
                     triggered_time: "$$this.triggered_time",
-                    quota_short: "$$this.quota._id",
-                    quota_name: "$$this.quota.name",
+                    triggered_rate: "$$this.triggered_ratio",
                     prev_rate: {
                       $round: [
                         {
@@ -312,6 +333,111 @@ class MongoService {
             "triggered",
             type
           ),
+        },
+      },
+      {
+        $project: {
+          base: "$short",
+          alerts: {
+            $concatArrays: [
+              {
+                $ifNull: ["$pending_alerts", []],
+              },
+              {
+                $ifNull: ["$triggered_alerts", []],
+              },
+            ],
+          },
+        },
+      },
+      {
+        $unwind: {
+          path: "$alerts",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$$ROOT", "$alerts"],
+          },
+        },
+      },
+      {
+        $project: {
+          prev_rate: 0,
+          curr_rate: 0,
+          alerts: 0,
+        },
+      },
+      {
+        $sort: {
+          set_time: -1,
+          triggered_time: -1,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            base: "$base",
+            quota: "$quota",
+          },
+          alerts: {
+            $push: {
+              id: "$id",
+              set_time: {
+                day: {
+                  $dayOfMonth: "$set_time",
+                },
+                month: {
+                  $month: "$set_time",
+                },
+                year: {
+                  $year: "$set_time",
+                },
+              },
+              set_rate: "$set_rate",
+              target_rate: "$target_rate",
+              triggered_time: {
+                day: {
+                  $dayOfMonth: "$triggered_time",
+                },
+                month: {
+                  $month: "$triggered_time",
+                },
+                year: {
+                  $year: "$triggered_time",
+                },
+              },
+              triggered_rate: "$triggered_rate",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          id: "$_id",
+          alerts: 1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $match: {
+          "alerts.id": {
+            $not: {
+              $in: [],
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          "alerts.triggered_time": -1,
+          "alerts.set_time": -1,
         },
       },
     ];

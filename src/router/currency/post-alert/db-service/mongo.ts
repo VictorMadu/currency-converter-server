@@ -2,7 +2,7 @@ import { IMongo } from "../../../../db/mongo/_dtypes";
 import { IGetCurrencyPrice, IPostPrices } from "./_dtypes";
 import { Document } from "mongodb";
 import * as _ from "lodash";
-import { throwError } from "../../../../lib";
+import { throwError } from "../../../../_utils";
 import { ObjectId } from "mongodb";
 
 class MongoService {
