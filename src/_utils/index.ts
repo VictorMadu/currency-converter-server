@@ -36,11 +36,11 @@ export const throwError = (msg: string) => {
 };
 
 export class ItemsStack {
-  private cond: boolean = true;
+  private cond: boolean | undefined = true;
   private items: string[] = [];
   constructor() {}
 
-  condition(condition: boolean | Func<[], boolean>) {
+  condition(condition: boolean | Func<[], boolean> | undefined) {
     this.cond = this.runCondition(condition);
     return this;
   }
@@ -60,9 +60,9 @@ export class ItemsStack {
     return this;
   }
 
-  private runCondition(condition: boolean | Func<[], boolean>) {
+  private runCondition(condition: boolean | Func<[], boolean> | undefined) {
     if (typeof condition === "boolean") return condition;
-    return condition();
+    return condition && condition();
   }
 }
 

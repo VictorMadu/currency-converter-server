@@ -16,7 +16,7 @@ const config = async () => {
     path.join(process.cwd(), getConfigFileName()),
     { encoding: ENCODING }
   );
-  return yaml.load(configFile) as Record<string, any>;
+  return yaml.load(configFile) as Record<string, any>; // TODO: the app root file is also using yaml to load the same file. Create a seperate store file to the app will load yaml into and then read from it.
 };
 
 function getConfigFileName() {

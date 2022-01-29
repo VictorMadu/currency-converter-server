@@ -5,14 +5,14 @@ import { getDbService } from "./db-service";
 import * as _ from "lodash";
 import { emailTransformer } from "./transformers";
 import { emailValidator, pwdValidator } from "./validators";
-import { Req, Rep } from "./_dtypes";
+import { IReq, IRep } from "./_dtypes";
 import { onErrorOnPipe } from "../_utils/funcs";
 import { getReqPayloadTransformed } from "../../../router/req-payload-transformed";
 
 const preHandler = async (
   fastify: FastifyInstance,
-  request: Req,
-  reply: Rep
+  request: IReq,
+  reply: IRep
 ) => {
   const onError = _.partial(onErrorOnPipe, reply);
 
@@ -25,6 +25,7 @@ const preHandler = async (
     .run(request.body.pwd);
 
   _.set(getReqPayloadTransformed(request), "body.email", emailTransformed);
+  _.set(getReqPayloadTransformed(request), "query", request.query);
 };
 
 export default preHandler;

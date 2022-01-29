@@ -1,13 +1,14 @@
 import { FastifyPluginAsync } from "fastify";
-import * as _ from "lodash";
 import dbServicePlugin from "./db-service";
+import * as _ from "lodash";
 import handler from "./handler";
+import { res200Schema, reqHeaderSchema } from "./schemas";
 import preHandler from "./pre-handler";
-import { res200Schema, bodySchema, querySchema } from "./schemas";
 import { IRoute } from "./_dtypes";
 
-const loginInPlugin: FastifyPluginAsync = async (fastify, opts) => {
+const wsTicketPlugin: FastifyPluginAsync = async (fastify, opts) => {
   fastify.register(dbServicePlugin);
+
   fastify.post<IRoute>(
     "",
     {
@@ -15,8 +16,7 @@ const loginInPlugin: FastifyPluginAsync = async (fastify, opts) => {
         response: {
           "200": res200Schema,
         },
-        querystring: querySchema,
-        body: bodySchema,
+        headers: reqHeaderSchema,
       },
     },
     _.partial(handler, fastify)
@@ -24,4 +24,4 @@ const loginInPlugin: FastifyPluginAsync = async (fastify, opts) => {
   fastify.addHook("preHandler", _.partial(preHandler, fastify));
 };
 
-export default loginInPlugin;
+export default wsTicketPlugin;

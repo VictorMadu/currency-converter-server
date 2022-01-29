@@ -1,6 +1,7 @@
 import { NonEmptyArray } from "../../../../dtypes";
 import { IMongo } from "../../../../db/mongo/_dtypes";
 import MongoService from "./_mongo";
+import { IGetUserConfig } from "./_dtype";
 
 class Service {
   private mongoService: MongoService;
@@ -19,6 +20,9 @@ class Service {
 
   async updateTheme(id: string, opts: { theme: "light" | "dark" }) {
     return await this.mongoService.updateTheme(id, opts);
+  }
+  async getUser(email: string, config?: IGetUserConfig) {
+    return await this.mongoService.getUser(email, config ?? {});
   }
 }
 

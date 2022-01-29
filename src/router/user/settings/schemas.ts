@@ -9,6 +9,16 @@ export const reqHeaderSchema = {
   required: ["authorization"],
 } as const;
 
+export const querySchema = {
+  type: "object",
+  properties: {
+    theme: { enum: ["0", "1"] },
+    notify_opts: { enum: ["0", "1"] },
+  },
+  // TODO: add conditional/dependent schema for properties of res201Schema as it depends on the properties of querySchema
+  additionalProperties: false,
+} as const;
+
 export const bodySchema = {
   type: "object",
   properties: {
@@ -31,7 +41,7 @@ export const bodySchema = {
   additionalProperties: false,
 } as const;
 
-export const res201Schema = {
+export const res200Schema = {
   type: "object",
   properties: {
     success: { type: "boolean" },
@@ -39,6 +49,20 @@ export const res201Schema = {
       type: "object",
       properties: {
         modifiedCount: { type: "number" },
+        user: {
+          type: "object",
+          properties: {
+            app_theme: { enum: ["light", "dark"] },
+            notify_opts: {
+              type: "array",
+              items: { enum: ["app", "phone", "email"] },
+              minItems: 1,
+              uniqueItems: true,
+            },
+          },
+          additionalProperties: false,
+          // TODO: add conditional/dependent schema for properties of res201Schema as it depends on the properties of querySchema
+        },
       },
       required: ["modifiedCount"],
       additionalProperties: false,

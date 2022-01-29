@@ -1,15 +1,6 @@
 import { IMongo } from "../../../db/mongo/_dtypes";
-import {
-  AggregationCursor,
-  Document,
-  FindCursor,
-  ObjectId,
-  WithId,
-  WithoutId,
-} from "mongodb";
+import { AggregationCursor, ObjectId } from "mongodb";
 import * as _ from "lodash";
-import { throwError } from "../../../_utils";
-import { FastifyInstance } from "fastify";
 import { ITriggeredAlertDocument } from "./_dtypes";
 
 class MongoService {
@@ -31,26 +22,16 @@ class MongoService {
     }
   }
 
-  async getAlertsToTrigger() {
+  async getAlertsToTrigger(payload: { currTime: Date }) {
     const cursor: AggregationCursor<ITriggeredAlertDocument> = await this.mongo
       .col("currencies")
-      .aggregate(this.getAlertsToTriggerPipeline());
+      .aggregate(this.getAlertsToTriggerPipeline(payload.currTime));
     return cursor;
   }
 
   async updateMetaData() {}
 
-  async pushReachedAlertToTriggered(pendingAlert: {
-    triggered_time: Date;
-    triggered_ratio: number;
-    base: string;
-    user_id: ObjectId;
-    _id: ObjectId;
-    set_time: Date;
-    target_ratio: number;
-    set_ratio: number;
-    quota: string;
-  }) {
+  async pushReachedAlertToTriggered(pendingAlert: ITriggeredAlertDocument) {
     try {
       const pullFromPending = await this.mongo.col("currencies").updateOne(
         { _id: pendingAlert.base },
@@ -67,7 +48,7 @@ class MongoService {
           $push: {
             triggered_alerts: {
               _id: pendingAlert._id,
-              user_id: pendingAlert.user_id,
+              user_id: pendingAlert.user.id,
               quota: pendingAlert.quota,
               set_ratio: pendingAlert.set_ratio,
               set_time: pendingAlert.set_time,
@@ -88,29 +69,60 @@ class MongoService {
   }
 
   async updateCurrencyMetaData(payload: { base: string; timestamp: Date }) {
-    const cursor = await this.mongo.col("currencies").find(
-      { _id: "currencies" },
+    const cursor = await this.mongo.col("__meta").aggregate([
       {
-        limit: 1,
-        projection: {
-          _id: 0,
-          lastBase: { $last: "$bases" },
+        $match: {
+          _id: "currencies",
         },
-      }
-    );
+      },
+      {
+        $unwind: {
+          path: "$bases",
+        },
+      },
+      {
+        $match: {
+          "bases.id": {
+            $exists: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          timestamp: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          bases: {
+            $push: "$bases",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          lastBase: {
+            $last: "$bases",
+          },
+        },
+      },
+    ]);
     const [result] = ((await cursor.toArray()) as unknown) as [
-      { lastBase: { base: string; time: Date } }
+      { lastBase: { id: string; timestamp: Date } }
     ];
-    const updateCmd: { time: Date; base?: string } = {
-      time: payload.timestamp,
+
+    const updateCmd: { timestamp: Date; id?: string } = {
+      timestamp: payload.timestamp,
     };
-    if (result.lastBase.base !== payload.base) updateCmd.base = payload.base;
+    if (result.lastBase.id !== payload.base) updateCmd.id = payload.base;
 
     const updateResult = await this.mongo
-      .col("currencies")
+      .col("__meta")
       .updateOne({ _id: "currencies" }, { $push: { bases: updateCmd } });
 
-    return updateResult.modifiedCount === 1;
+    return updateResult.acknowledged;
   }
 
   async getUserNotifyMeans(userId: ObjectId) {
@@ -127,14 +139,14 @@ class MongoService {
     return user.notificationMeans;
   }
 
-  getAlertsToTriggerPipeline() {
+  getAlertsToTriggerPipeline(currTime: Date) {
     return [
       {
         $project: {
           _id: 0,
           short: "$_id",
           name: 1,
-          curr_timestamp: 13252355,
+          curr_timestamp: currTime,
           curr_rate: {
             $last: "$rates",
           },
@@ -246,11 +258,40 @@ class MongoService {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          let: {
+            userId: "$pending_alerts.user_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$$userId", "$_id"],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                id: "$$userId",
+                email: "$email",
+                phone: "$phone",
+                notification_medium: { $ifNull: ["$settings.notify", []] },
+              },
+            },
+          ],
+          as: "user",
+        },
+      },
+      {
         $project: {
           triggered_time: "$$NOW",
           triggered_ratio: "$curr_ratio",
           base: "$short",
-          user_id: "$pending_alerts.user_id",
+          user: {
+            $first: "$user",
+          },
           _id: "$pending_alerts._id",
           set_time: "$pending_alerts.set_time",
           target_ratio: "$pending_alerts.target_ratio",

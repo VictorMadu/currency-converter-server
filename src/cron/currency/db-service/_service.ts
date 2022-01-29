@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ObjectId } from "mongodb";
 import { IMongo } from "../../../db/mongo/_dtypes";
 import MongoService from "./mongo";
+import { ITriggeredAlertDocument } from "./_dtypes";
 
 class DbService {
   private mongoService: MongoService;
@@ -13,8 +14,8 @@ class DbService {
     return await this.mongoService.updateCurrencyRate(payload);
   }
 
-  async getAlertsToTrigger() {
-    return await this.mongoService.getAlertsToTrigger();
+  async getAlertsToTrigger(payload: { currTime: Date }) {
+    return await this.mongoService.getAlertsToTrigger(payload);
   }
 
   async updateCurrencyMetaData(payload: { base: string; timestamp: Date }) {
@@ -23,6 +24,10 @@ class DbService {
 
   async getUserNotifyMeans(userId: ObjectId) {
     return this.mongoService.getUserNotifyMeans(userId);
+  }
+
+  async pushReachedAlertToTriggered(triggeredAlert: ITriggeredAlertDocument) {
+    return this.mongoService.pushReachedAlertToTriggered(triggeredAlert);
   }
 }
 

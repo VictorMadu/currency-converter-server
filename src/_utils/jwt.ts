@@ -3,6 +3,7 @@ import * as _ from "lodash";
 
 export interface IParsedUser {
   id: string;
+  email: string;
 }
 
 export const signUser = (

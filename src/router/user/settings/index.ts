@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import dbServicePlugin from "./db-service";
 import handler from "./handler";
 import preHandler from "./pre-handler";
-import { res201Schema, bodySchema, reqHeaderSchema } from "./schemas";
+import { res200Schema, bodySchema, reqHeaderSchema } from "./schemas";
 
 const updateSettingsPlugin: FastifyPluginAsync = async (fastify, opts) => {
   fastify.register(dbServicePlugin);
@@ -13,7 +13,7 @@ const updateSettingsPlugin: FastifyPluginAsync = async (fastify, opts) => {
     {
       schema: {
         response: {
-          "201": res201Schema,
+          "200": res200Schema,
         },
         body: bodySchema,
         headers: reqHeaderSchema,

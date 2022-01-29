@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
-import { MONGO_KEY } from "../../utils";
-import { getMongo } from "../../../db/mongo";
+import { getMongo } from "../../../../db/mongo";
+import { MONGO_KEY } from "../../../_constants";
 import DbService from "./_service";
 
 const $dbService = Symbol("dbService");

@@ -1,11 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { FromSchema } from "json-schema-to-ts";
-import { bodySchema } from "./schemas";
+import { bodySchema, querySchema, res200Schema } from "./schemas";
+
+export type IReqQuery = FromSchema<typeof querySchema>;
 
 export type IReqBody = FromSchema<typeof bodySchema>;
 
-export type Route = { Body: IReqBody };
+export type IRoute = { Body: IReqBody; Querystring: IReqQuery };
 
-export type Req = FastifyRequest<Route>;
+export type IReq = FastifyRequest<IRoute>;
 
-export type Rep = FastifyReply;
+export type IRep = FastifyReply;
+
+export type IRes200 = FromSchema<typeof res200Schema>;

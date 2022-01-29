@@ -2,9 +2,10 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { getConfig } from "../../../config";
 import { Pipe } from "../../../_utils";
 import * as _ from "lodash";
-import { IReqBody, IReqData, IRoute } from "./_dtypes";
+import { IReqBody, IReqData, IReqQuery, IRoute } from "./_dtypes";
 import { headerAuthTransformer } from "./transformers";
 import { getReqPayloadTransformed } from "../../req-payload-transformed";
+import * as jwt from "../../../_utils/jwt";
 
 const preHandler = async (
   fastify: FastifyInstance,
@@ -17,12 +18,17 @@ const preHandler = async (
   };
 
   const jwtSecretKey = _.get(getConfig(fastify), "jwt.cat1.secret_key");
-  const userId = await headerAuthTransformer
+  const user = (await headerAuthTransformer
     .setContext([jwtSecretKey, onForbiddenError])
-    .run(request.headers.authorization);
+    .run(request.headers.authorization)) as jwt.IParsedUser;
+
+  _.set(getReqPayloadTransformed(request), "query", request.query) as IReqQuery;
 
   _.set(getReqPayloadTransformed(request), "body", request.body) as IReqBody;
-  _.set(getReqPayloadTransformed(request), "data", { userId }) as IReqData;
+  _.set(getReqPayloadTransformed(request), "data", {
+    userId: user.id,
+    userEmail: user.email,
+  }) as IReqData;
 };
 
 export default preHandler;

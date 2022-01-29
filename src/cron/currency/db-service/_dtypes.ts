@@ -4,10 +4,15 @@ export interface ITriggeredAlertDocument {
   triggered_time: Date;
   triggered_ratio: number;
   base: string;
-  user_id: ObjectId;
+  user: {
+    id: ObjectId;
+    email: string;
+    phone: string;
+    notification_medium: ("app" | "email" | "phone")[];
+  };
   _id: ObjectId;
   set_time: Date;
   target_ratio: number;
-  set_rate: number;
+  set_ratio: number;
   quota: string;
 }

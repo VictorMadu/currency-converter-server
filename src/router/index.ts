@@ -18,6 +18,7 @@ const routerPlugin: FastifyPluginAsync<{ prefix: string }> = async (
   fastify.register(reqPayloadTransformedPlugin);
   fastify.register(userPlugin, { prefix: "/user" });
   fastify.register(currencyPlugin, { prefix: "/currency" });
+  // fastify.register(wsTicketPlugin, { prefix: "/ws-ticket" });
 };
 
 export default routerPlugin;

@@ -3,7 +3,7 @@ import { getConfig } from "../../../config";
 import { Pipe } from "../../../_utils";
 import { getDbService } from "./db-service";
 import * as _ from "lodash";
-import { IReq, IRep, IReqQuery, IReqData } from "./_dtypes";
+import { IReq, IRep, IReqData } from "./_dtypes";
 import { getReqPayloadTransformed } from "../../../router/req-payload-transformed";
 import { headerAuthTransformer } from "../../user/settings/transformers";
 import * as jwt from "../../../_utils/jwt";
@@ -23,7 +23,6 @@ const preHandler = async (
     .setContext([jwtSecretKey, onForbiddenError])
     .run(request.headers.authorization)) as jwt.IParsedUser;
 
-  _.set(getReqPayloadTransformed(request), "query", request.query) as IReqQuery;
   _.set(getReqPayloadTransformed(request), "data", {
     userId: user.id,
   }) as IReqData;
