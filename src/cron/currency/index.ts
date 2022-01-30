@@ -20,7 +20,7 @@ const currencyCronPlugin: FastifyPluginAsync = async (fastify, opts) => {
   const apiKeysLength = apiKeys.length;
   let currApiKeyIndex = -1;
 
-  const job = new CronJob("20 * * * * *", async () => {
+  const job = new CronJob("* * 4 * * *", async () => {
     currApiKeyIndex = (currApiKeyIndex + 1) % apiKeysLength;
     fastify.log.info(
       "Started currency cron job and uaing api key of index",
@@ -92,7 +92,6 @@ const notifyUsersAndPushToTriggered = async (
 ) => {
   let triggeredAlert: ITriggeredAlertDocument | null;
   while ((triggeredAlert = await cursor.next())) {
-    console.log("\n\n\nNext pending alert to trigger", triggeredAlert);
     notifyUser(
       {
         alertId: triggeredAlert._id,
@@ -186,7 +185,6 @@ const notifyApp = async (
   } & {}
 ) => {
   // ws implemented in currency ws
-  console.log("Notifying app about app", payload);
   wsEventEmitter.emit("notify-alert-triggered-user-app", {
     alertId: payload.alertId,
     userId: payload.userId,
@@ -428,7 +426,6 @@ const getNewCurrencyRates = async (apiKey: string) => {
 };
 
 const notifyPriceUpdate = () => {
-  console.log("notifying of price update");
   wsEventEmitter.emit("price-update");
 };
 

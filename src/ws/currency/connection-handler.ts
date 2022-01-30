@@ -5,8 +5,6 @@ import { WebSocketServer, WebSocket } from "ws";
 import wsEventEmitter from "../event-emitter";
 import dbServicePlugin, { getDbService } from "./db-service";
 import * as _ from "lodash";
-import mongoPlugin from "../../db/mongo";
-import { MONGO_KEY } from "./utils";
 
 const connectionHandlerPlugin: FastifyPluginAsync<{
   wss: WebSocketServer;
@@ -77,11 +75,9 @@ const connectionHandlerPlugin: FastifyPluginAsync<{
       quota: string;
       triggeredTime: Date;
     }) => {
-      console.log("Got Notifying app about app", payload);
       const connectedUser = connectedUsers.get(payload.userId.toString());
       if (!connectedUser) return; // TODO: Its an error. Log this
       const [ws] = connectedUser;
-      console.log("Got connected ws", ws);
 
       ws.send(
         JSON.stringify({
@@ -95,7 +91,6 @@ const connectionHandlerPlugin: FastifyPluginAsync<{
           },
         })
       );
-      console.log("Sent ws");
     }
   );
 

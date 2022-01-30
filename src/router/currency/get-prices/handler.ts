@@ -12,9 +12,10 @@ const handler = async (fastify: FastifyInstance, request: Req, reply: Rep) => {
     "query"
   ) as IReqQuery;
 
-  const baseId = base ?? (await dbService.getBaseId());
-  if (_.isUndefined(baseId))
+  const baseId = base === undefined ? base : await dbService.getBaseId();
+  if (_.isUndefined(baseId)) {
     return throwError("base currency in 'currencies' in '__meta' is not found");
+  }
   const result = await dbService.getPrices({
     base: baseId,
     currencies: quota,

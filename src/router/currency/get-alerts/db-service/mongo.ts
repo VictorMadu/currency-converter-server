@@ -9,17 +9,6 @@ class MongoService {
   constructor(private mongo: IMongo) {}
 
   async getAlerts(payload: IGetPrices) {
-    console.log(
-      "\n\n\n",
-      JSON.stringify(
-        this.getPipeline(
-          new ObjectId(payload.userId),
-          payload.bases,
-          payload.quotas,
-          payload.type
-        )
-      )
-    );
     const cursor = await this.mongo
       .col("currencies")
       .aggregate(
@@ -120,10 +109,7 @@ class MongoService {
                           },
                           quotas
                             ? {
-                                $in: [
-                                  "$$triggered_alert.quota",
-                                  ["NGN", "AFN"],
-                                ],
+                                $in: ["$$triggered_alert.quota", quotas],
                               }
                             : true,
                         ],

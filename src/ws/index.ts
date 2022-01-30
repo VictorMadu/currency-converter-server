@@ -15,7 +15,6 @@ const wsPlugin: FastifyPluginAsync = async (fastify, opts) => {
     dbEventEmitter.on(
       "verified-ticket-user-id",
       (userId: ObjectId | undefined) => {
-        console.log("\n\nuserId", userId);
         if (!userId) return socket.destroy();
         if (_.includes(pathname, "/currency"))
           getCurrencyWsHandler(fastify).handle(request, socket, head, {

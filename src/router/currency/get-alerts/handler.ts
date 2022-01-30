@@ -19,8 +19,6 @@ const handler = async (
     type: query.type,
   });
 
-  console.log("\n\nRESULT:", JSON.stringify(result));
-
   const res = {
     success: true,
     data: result,

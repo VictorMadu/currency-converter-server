@@ -20,7 +20,7 @@ class MongoService {
                 [
                   {
                     _id: new ObjectId(),
-                    userId: new ObjectId(payload.userId),
+                    user_id: new ObjectId(payload.userId),
                     quota: payload.quota,
                     set_time: "$$NOW",
                     set_ratio: {
@@ -40,7 +40,6 @@ class MongoService {
         },
       ]);
 
-    console.log("result", result);
     return result.modifiedCount === 1;
   }
 
@@ -55,8 +54,6 @@ class MongoService {
 
     const currency = await cursor.next();
     cursor.close();
-
-    console.log("currency price", payload.short, currency);
 
     return currency?.curr_rate as number | null;
   }

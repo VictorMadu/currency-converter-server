@@ -33,20 +33,10 @@ class MongoService {
 
   async getBaseId() {
     // TODO: Accept an optional date in which we will aggreagte and obtain the base with the maximum date of all dates less or equla to the passed optional date else just return the maximum date of all dates
-    const cursor = await this.mongo.col("__meta").find(
-      { _id: "currencies" },
-      {
-        limit: 1,
-        projection: {
-          _id: 0,
-          currBase: { $last: "$bases.id" },
-        },
-      }
-    );
-
-    const result = await cursor.next();
-    cursor.close();
-
+    const cursor = await this.mongo
+      .col("__meta")
+      .aggregate(this.getBaseIdPipeline());
+    const [result] = await cursor.toArray();
     return result?.currBase as string | undefined;
   }
 
@@ -61,14 +51,13 @@ class MongoService {
       }
     );
 
-    const result = await cursor.next();
+    const [result] = await cursor.toArray();
     if (result == null)
       return throwError(
         "'base' currency does not exist in the currencies collection"
       );
     const lastTwo = result!.lastTwo as [number] | [number, number];
 
-    cursor.close();
     return lastTwo.length === 1 ? [undefined, ...lastTwo] : lastTwo;
   }
 
@@ -114,6 +103,42 @@ class MongoService {
               6,
             ],
           },
+        },
+      },
+    ];
+  }
+
+  private getBaseIdPipeline() {
+    return [
+      {
+        $match: {
+          _id: "currencies",
+        },
+      },
+      {
+        $unwind: {
+          path: "$bases",
+        },
+      },
+      {
+        $match: {
+          "bases.id": {
+            $exists: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          "bases.timestamp": -1,
+        },
+      },
+      {
+        $limit: 1,
+      },
+      {
+        $project: {
+          _id: 0,
+          currBase: "$bases.id",
         },
       },
     ];
